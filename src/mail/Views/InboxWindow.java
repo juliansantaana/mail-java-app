@@ -10,6 +10,7 @@ import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.logging.Level;
@@ -19,8 +20,10 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import mail.Mensaje;
+import mail.MensajeComun;
 import mail.Sistema;
 import mail.Usuario;
+import mail.UsuarioComponente;
 
 /**
  *
@@ -40,6 +43,7 @@ public class InboxWindow extends javax.swing.JFrame {
         
         tblMessages.addMouseListener(new TableDoubleClickListener());
         
+        //refreshMessageList();
     }
     
     public class TableDoubleClickListener extends MouseAdapter{
@@ -56,8 +60,25 @@ public class InboxWindow extends javax.swing.JFrame {
     }
     
     public void messageDblClicked(int id){
+        openMessage(id);
+    }
+    
+    public void openMessage(int id){
         Mensaje msg = Sistema.getInstance().getCurrentUser().getMensaje(id);
+        openMessage(msg, null);
+    }
+    
+    public void openMessage(Mensaje msg){
+        openMessage(msg, null);
+    }
+    
+    public void openMessage(Mensaje msg, WindowAdapter wa){
         ViewMailWindow vmw = new ViewMailWindow(msg);
+        
+        if (wa != null){
+            vmw.addWindowListener(wa);
+        }
+        
         vmw.setVisible(true);
         
         //letting the state know that the message has been opened
@@ -109,6 +130,7 @@ public class InboxWindow extends javax.swing.JFrame {
         btnRefresh = new javax.swing.JButton();
         jSeparator2 = new javax.swing.JSeparator();
         btnDelete = new javax.swing.JButton();
+        btnLogout = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -160,6 +182,13 @@ public class InboxWindow extends javax.swing.JFrame {
             }
         });
 
+        btnLogout.setText("Cerrar Sesión");
+        btnLogout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLogoutActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -175,7 +204,9 @@ public class InboxWindow extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jSeparator1, javax.swing.GroupLayout.DEFAULT_SIZE, 1, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(btnDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(btnDelete, javax.swing.GroupLayout.DEFAULT_SIZE, 138, Short.MAX_VALUE)
+                            .addComponent(btnLogout, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -199,7 +230,9 @@ public class InboxWindow extends javax.swing.JFrame {
                     .addComponent(btnComposeMail))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 259, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 259, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(28, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -207,8 +240,9 @@ public class InboxWindow extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnDelete)))
-                .addContainerGap(22, Short.MAX_VALUE))
+                        .addComponent(btnDelete)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnLogout))))
         );
 
         pack();
@@ -225,12 +259,7 @@ public class InboxWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_btnComposeMailActionPerformed
 
     private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
-        // TODO add your handling code here:
-        Usuario user = Sistema.getInstance().getCurrentUser();
-        ArrayList<Mensaje> messages = user.getMensajes();
-        fillMessageList(messages);
-        
-        //tblMessages.setModel(model);
+        refreshMessageList();
     }//GEN-LAST:event_btnRefreshActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
@@ -244,6 +273,8 @@ public class InboxWindow extends javax.swing.JFrame {
             } catch (Exception ex) {
                 Logger.getLogger(InboxWindow.class.getName()).log(Level.SEVERE, null, ex);
             }
+            
+            refreshMessageList();
         }else{
             JOptionPane.showMessageDialog(null, "El mensaje no puede ser eliminado sin ser leido antes.");
             //TODO call show message with a callback to delete message after closing the window.
@@ -273,6 +304,49 @@ public class InboxWindow extends javax.swing.JFrame {
         
     }//GEN-LAST:event_btnSearchActionPerformed
 
+    private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutActionPerformed
+        // TODO add your handling code here:
+        Sistema.getInstance().setCurrentUser(null);
+        
+        MainWindow mw = new MainWindow();
+        mw.setVisible(true);
+        
+        this.dispose();
+    }//GEN-LAST:event_btnLogoutActionPerformed
+    
+    public void refreshMessageList(){
+        Usuario user = Sistema.getInstance().getCurrentUser();
+        ArrayList<Mensaje> messages = user.getMensajes();
+        fillMessageList(messages);
+        
+        //checking if there's any urgent message
+        for (Mensaje msg : messages){
+            if (msg.isUrgent() && !msg.getReadState().isRead()){
+                openMessage(msg, new java.awt.event.WindowAdapter() {
+                    @Override
+                    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                        sendReadNotification(msg);
+                    }
+                });
+            }
+        }
+    }
+    
+    private void sendReadNotification(Mensaje msg){
+        MensajeComun notification = new MensajeComun();
+        notification.setRemitente(Sistema.getInstance().getCurrentUser());
+        
+        ArrayList<UsuarioComponente> destinatarios = new ArrayList<>();
+        destinatarios.add(msg.getRemitente());
+        notification.setDestinatarios(destinatarios);
+        
+        notification.setAsunto("Aviso Lectura: " + msg.getAsunto());
+        notification.setCuerpo("Este es un aviso de lectura, el mail con asunto: [ " + msg.getAsunto() + " ] ha sido leido.");
+        notification.setCategoria(msg.getCategoria());
+        
+        Sistema.getInstance().getCurrentUser().sendEmail(notification);
+    }
+    
     private void fillMessageList(ArrayList<Mensaje> messages){
         DefaultTableModel model = ((DefaultTableModel)tblMessages.getModel());
         
@@ -325,6 +399,7 @@ public class InboxWindow extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnComposeMail;
     private javax.swing.JButton btnDelete;
+    private javax.swing.JButton btnLogout;
     private javax.swing.JButton btnRefresh;
     private javax.swing.JButton btnSearch;
     private javax.swing.JComboBox cmbSearchMode;

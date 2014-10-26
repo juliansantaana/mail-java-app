@@ -134,6 +134,9 @@ public class LoginWindow extends javax.swing.JFrame {
             //JOptionPane.showMessageDialog(null, "Login success!");
             InboxWindow iw = new InboxWindow();
             iw.setVisible(true);
+            
+            iw.refreshMessageList();
+            
             this.dispose();
         }else{
             //show message box with error

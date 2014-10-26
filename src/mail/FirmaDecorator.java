@@ -31,5 +31,10 @@ public class FirmaDecorator extends MensajeDecorator {
     public String getFirma(){
         return this.firma;
     }
+
+    @Override
+    public Mensaje deepCopy() {
+        return new FirmaDecorator(this);
+    }
     
 }

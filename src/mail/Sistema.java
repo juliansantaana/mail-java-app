@@ -144,7 +144,8 @@ public class Sistema {
                 tousers = tousers.concat(((Usuario)user).getNick() + ";");
             }else if (user instanceof UserGroup){
                 UserGroup group = (UserGroup) user;
-                tousers = tousers.concat(group.getNicks(";"));
+                //tousers = tousers.concat(group.getNicks(";"));
+                tousers = tousers.concat("#" + group.getName() + ";");
             }
         }
         

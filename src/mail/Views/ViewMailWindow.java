@@ -45,6 +45,7 @@ public class ViewMailWindow extends javax.swing.JFrame {
     private void refreshViewFromMessage(){
         txtFrom.setText(this.message.getRemitente().getNick());
         txtTo.setText(Sistema.getInstance().getMailStringFromUsers(this.message.getDestinatarios()));
+        txtSubject.setText(this.message.getAsunto());
         lblCategory.setText(this.message.getCategoria().getName());
         txtMessage.setText(this.message.getCuerpo());
         updateSignatureField();
@@ -83,6 +84,8 @@ public class ViewMailWindow extends javax.swing.JFrame {
         txtSignature = new javax.swing.JTextArea();
         btnReply = new javax.swing.JButton();
         btnReplyAll = new javax.swing.JButton();
+        lblSubject = new javax.swing.JLabel();
+        txtSubject = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -122,6 +125,11 @@ public class ViewMailWindow extends javax.swing.JFrame {
             }
         });
 
+        lblSubject.setFont(new java.awt.Font("Lucida Grande", 0, 14)); // NOI18N
+        lblSubject.setText("Asunto");
+
+        txtSubject.setEditable(false);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -132,24 +140,25 @@ public class ViewMailWindow extends javax.swing.JFrame {
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(12, 12, 12)
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtFrom))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtTo, javax.swing.GroupLayout.DEFAULT_SIZE, 564, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
                         .addComponent(lblCategoryPreLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(lblCategory, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(lblCategory, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel2)
+                            .addComponent(lblSubject)
+                            .addComponent(jLabel1))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addGap(0, 281, Short.MAX_VALUE)
+                                .addComponent(btnReplyAll)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnReply))
+                            .addComponent(txtFrom, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(txtTo)
+                            .addComponent(txtSubject))))
                 .addContainerGap())
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(btnReplyAll)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnReply))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -164,16 +173,21 @@ public class ViewMailWindow extends javax.swing.JFrame {
                     .addComponent(txtTo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblSubject)
+                    .addComponent(txtSubject, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblCategoryPreLabel)
                     .addComponent(lblCategory))
                 .addGap(12, 12, 12)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 14, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnReply)
-                    .addComponent(btnReplyAll)))
+                    .addComponent(btnReplyAll))
+                .addContainerGap())
         );
 
         pack();
@@ -267,9 +281,11 @@ public class ViewMailWindow extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel lblCategory;
     private javax.swing.JLabel lblCategoryPreLabel;
+    private javax.swing.JLabel lblSubject;
     private javax.swing.JTextField txtFrom;
     private javax.swing.JTextArea txtMessage;
     private javax.swing.JTextArea txtSignature;
+    private javax.swing.JTextField txtSubject;
     private javax.swing.JTextField txtTo;
     // End of variables declaration//GEN-END:variables
 }

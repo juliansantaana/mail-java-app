@@ -7,6 +7,7 @@ package mail.Views;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
 import java.util.ArrayList;
 import java.util.Date;
 import javax.swing.JOptionPane;
@@ -29,31 +30,30 @@ public class ComposeMailWindow extends javax.swing.JFrame {
     /**
      * Creates new form ComposeMail
      */
-    
     private static final String COMMIT_ACTION = "commit";
     private Mensaje message;
-    
+
     //sub views
     private AddCategoryHelperWindow categoryHelperWindow;
-    
+
     public ComposeMailWindow() {
         initComponents();
-        
+
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        
+
         initAutocomplete();
-        
+
         message = new MensajeComun();
-        
+
         categoryHelperWindow = new AddCategoryHelperWindow();
         categoryHelperWindow.addActionListenerAceptar(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 // Your action handling code in here
                 Category cat = categoryHelperWindow.getSelectedCategory();
                 message.setCategoria(cat);
-                
+
                 categoryHelperWindow.setVisible(false);
-                
+
                 updateCategoriaLabel();
                 System.out.println("Setting category to message: " + message.getCategoria().getName() + "\n");
             }
@@ -61,38 +61,38 @@ public class ComposeMailWindow extends javax.swing.JFrame {
         
         refreshViewFromMessage();
     }
-    
-    public ComposeMailWindow(Mensaje message){
+
+    public ComposeMailWindow(Mensaje message) {
         this();
         this.message = message;
         refreshViewFromMessage();
     }
-    
-    public void refreshViewFromMessage(){
+
+    public void refreshViewFromMessage() {
         txtToField.setText(Sistema.getInstance().getMailStringFromUsers(this.message.getDestinatarios()));
         txtAsunto.setText(this.message.getAsunto());
         updateCategoriaLabel();
         updateSignatureField();
         chkboxUrgent.setSelected(this.message.isUrgent());
     }
-    
-    private void initAutocomplete(){
+
+    private void initAutocomplete() {
         txtToField.setFocusTraversalKeysEnabled(false);
-        
+
         ArrayList<String> keywords = new ArrayList<>();
-        
-        for (String s : Sistema.getInstance().getUsersNicks()){
+
+        for (String s : Sistema.getInstance().getUsersNicks()) {
             keywords.add(s.toLowerCase());
         }
-        
+
         //using # to specify is a user group
-        for (String s : Sistema.getInstance().getSectionNames()){
+        for (String s : Sistema.getInstance().getSectionNames()) {
             keywords.add("#" + s.toLowerCase());
         }
-        
+
         //adding keyword for subordinates
         keywords.add("subordinados");
-        
+
         Autocomplete autoComplete = new Autocomplete(txtToField, keywords);
         txtToField.getDocument().addDocumentListener(autoComplete);
 
@@ -101,7 +101,7 @@ public class ComposeMailWindow extends javax.swing.JFrame {
         txtToField.getInputMap().put(KeyStroke.getKeyStroke("TAB"), COMMIT_ACTION);
         txtToField.getActionMap().put(COMMIT_ACTION, autoComplete.new CommitAction());
     }
-    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -308,43 +308,43 @@ public class ComposeMailWindow extends javax.swing.JFrame {
     private void btnAddSignatureActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddSignatureActionPerformed
         // TODO add your handling code here:
         String firma = JOptionPane.showInputDialog("Agregar firma: ");
-        
+
         Mensaje mm = this.message;
-        if (mm instanceof MensajeDecorator){
-            while((mm instanceof FirmaDecorator) == false || (mm instanceof MensajeDecorator) == false){
-                mm = ((MensajeDecorator)mm).getMensaje();
+        if (mm instanceof MensajeDecorator) {
+            while ((mm instanceof FirmaDecorator) == false || (mm instanceof MensajeDecorator) == false) {
+                mm = ((MensajeDecorator) mm).getMensaje();
             }
-            if (mm instanceof FirmaDecorator){
-                ((FirmaDecorator)mm).setFirma(firma);
-            }else{
+            if (mm instanceof FirmaDecorator) {
+                ((FirmaDecorator) mm).setFirma(firma);
+            } else {
                 this.message = new FirmaDecorator(this.message);
-                ((FirmaDecorator)this.message).setFirma(firma);
+                ((FirmaDecorator) this.message).setFirma(firma);
             }
-        }else{
+        } else {
             this.message = new FirmaDecorator(this.message);
-            ((FirmaDecorator)this.message).setFirma(firma);
+            ((FirmaDecorator) this.message).setFirma(firma);
         }
-        
+
         updateSignatureField();
         //System.out.println(this.message.getContenido());
     }//GEN-LAST:event_btnAddSignatureActionPerformed
 
-    private void updateSignatureField(){
+    private void updateSignatureField() {
         Mensaje mm = this.message;
-        if (mm instanceof MensajeDecorator){
-            while((mm instanceof FirmaDecorator) == false || (mm instanceof MensajeDecorator) == false){
-                mm = ((MensajeDecorator)mm).getMensaje();
+        if (mm instanceof MensajeDecorator) {
+            while ((mm instanceof FirmaDecorator) == false || (mm instanceof MensajeDecorator) == false) {
+                mm = ((MensajeDecorator) mm).getMensaje();
             }
-            if (mm instanceof FirmaDecorator){
-                txtSignature.setText(((FirmaDecorator)mm).getFirma());
+            if (mm instanceof FirmaDecorator) {
+                txtSignature.setText(((FirmaDecorator) mm).getFirma());
             }
         }
     }
-    
-    private void updateCategoriaLabel(){
+
+    private void updateCategoriaLabel() {
         lblCategory.setText(this.message.getCategoria().getName());
     }
-    
+
     private void txtMessageFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtMessageFocusLost
         // TODO add your handling code here:
     }//GEN-LAST:event_txtMessageFocusLost
@@ -365,9 +365,10 @@ public class ComposeMailWindow extends javax.swing.JFrame {
         this.message.setAsunto(txtAsunto.getText());
         this.message.setRemitente(Sistema.getInstance().getCurrentUser());
         this.message.setDestinatarios(Sistema.getInstance().getUsersFromMailString(txtToField.getText()));
-        this.message.setDatetime(new Date());
         
-        this.message.setId(Sistema.getInstance().getNextMessageId());
+        //this.message.setDatetime(new Date());
+        //this.message.setId(Sistema.getInstance().getNextMessageId());
+        
         Sistema.getInstance().getCurrentUser().sendEmail(message);
         this.dispose();
     }//GEN-LAST:event_btnSendActionPerformed
@@ -431,7 +432,5 @@ public class ComposeMailWindow extends javax.swing.JFrame {
     private javax.swing.JTextArea txtSignature;
     private javax.swing.JTextField txtToField;
     // End of variables declaration//GEN-END:variables
-
-    
 
 }

@@ -13,14 +13,14 @@ import java.util.Date;
  */
 public class Recordatorio extends MensajeComun{
     
-    private Date datetime;
+    private Date autosendDatetime = null;
 
-    public Date getDatetime() {
-        return datetime;
+    public Date getAutosendDatetime() {
+        return autosendDatetime;
     }
 
-    public void setDatetime(Date datetime) {
-        this.datetime = datetime;
+    public void setAutosendDatetime(Date autosendDatetime) {
+        this.autosendDatetime = autosendDatetime;
     }
     
 }

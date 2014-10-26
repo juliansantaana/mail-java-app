@@ -77,6 +77,8 @@ public class Mail {
                 Sistema.getInstance().setCurrentUser(user);
                 InboxWindow iw = new InboxWindow();
                 iw.setVisible(true);
+                
+                iw.refreshMessageList();
             }
         }
         

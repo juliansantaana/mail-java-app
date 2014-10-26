@@ -6,11 +6,15 @@
 package mail;
 
 import java.awt.List;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -103,7 +107,8 @@ public class Usuario implements UsuarioComponente{
     
     @Override
     public void addMessage(Mensaje message){
-        this.mensajes.add(message);
+        Mensaje cloned = message.deepCopy();
+        this.mensajes.add(cloned);
     }
     
     public void deleteMessage(Mensaje message) throws Exception{
@@ -115,6 +120,9 @@ public class Usuario implements UsuarioComponente{
     }
     
     public void sendEmail(Mensaje message){
+        message.setDatetime(new Date());
+        message.setId(Sistema.getInstance().getNextMessageId());
+        
         //this.addMessage(message);
         for (UsuarioComponente user : message.getDestinatarios()){
             user.addMessage(message);

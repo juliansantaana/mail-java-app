@@ -36,6 +36,21 @@ public abstract class Mensaje {
         this.readState = new NoLeidoState();
     }
     
+    public Mensaje(Mensaje msg){
+        this.id = msg.id;
+        this.remitente = msg.remitente;
+        this.destinatarios = msg.destinatarios;
+        this.asunto = msg.asunto;
+        this.cuerpo = msg.cuerpo;
+        this.categoria = msg.categoria;
+        this.datetime = msg.datetime;
+        this.urgent = msg.urgent;
+        this.readState = msg.readState;
+        this.replyTo = msg.replyTo;
+    }
+    
+    public abstract Mensaje deepCopy();
+    
     public abstract String getContenido();
 
     public Integer getId() {

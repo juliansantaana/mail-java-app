@@ -21,5 +21,10 @@ public class PlantillaDecorator extends MensajeDecorator {
     public String getContenido() {
         return this.getMensaje().getContenido();
     }
+
+    @Override
+    public Mensaje deepCopy() {
+        return new PlantillaDecorator(this);
+    }
     
 }
