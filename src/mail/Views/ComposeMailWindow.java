@@ -58,6 +58,22 @@ public class ComposeMailWindow extends javax.swing.JFrame {
                 System.out.println("Setting category to message: " + message.getCategoria().getName() + "\n");
             }
         });
+        
+        refreshViewFromMessage();
+    }
+    
+    public ComposeMailWindow(Mensaje message){
+        this();
+        this.message = message;
+        refreshViewFromMessage();
+    }
+    
+    public void refreshViewFromMessage(){
+        txtToField.setText(Sistema.getInstance().getMailStringFromUsers(this.message.getDestinatarios()));
+        txtAsunto.setText(this.message.getAsunto());
+        updateCategoriaLabel();
+        updateSignatureField();
+        chkboxUrgent.setSelected(this.message.isUrgent());
     }
     
     private void initAutocomplete(){

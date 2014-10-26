@@ -137,4 +137,18 @@ public class Sistema {
         return users;
     }
     
+    public String getMailStringFromUsers(ArrayList<UsuarioComponente> users){
+        String tousers = "";
+        for (UsuarioComponente user : users){
+            if (user instanceof Usuario){
+                tousers = tousers.concat(((Usuario)user).getNick() + ";");
+            }else if (user instanceof UserGroup){
+                UserGroup group = (UserGroup) user;
+                tousers = tousers.concat(group.getNicks(";"));
+            }
+        }
+        
+        return tousers;
+    }
+    
 }

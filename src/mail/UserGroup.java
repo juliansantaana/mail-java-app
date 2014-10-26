@@ -54,6 +54,19 @@ public class UserGroup implements UsuarioComponente {
     public void setUsers(ArrayList<UsuarioComponente> users) {
         this.users = users;
     }
+    
+    public String getNicks(String separator){
+        separator = (separator == null) ? ";" : separator;
+        String users = "";
+        for (UsuarioComponente user : this.getUsers()){
+            if (user instanceof Usuario){
+                users = users.concat(((Usuario)user).getNick() + ";");
+            }else if (user instanceof UserGroup){
+                users = users.concat(((UserGroup)user).getNicks(separator));
+            }
+        }
+        return users;
+    }
 
     @Override
     public void addMessage(Mensaje message) {

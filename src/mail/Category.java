@@ -16,6 +16,9 @@ public class Category {
     private String description;
     
     public Category(){
+        this.id = -1;
+        this.name = "";
+        this.description = "";
     }
 
     @Override

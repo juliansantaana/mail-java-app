@@ -23,8 +23,16 @@ public abstract class Mensaje {
     private Date datetime = new Date();
     private boolean urgent;
     private MensajeState readState;
+    private Mensaje replyTo = null;
     
     public Mensaje(){
+        this.id = -1;
+        this.remitente = new Usuario();
+        this.destinatarios = new ArrayList<UsuarioComponente>();
+        this.asunto = "";
+        this.cuerpo = "";
+        this.categoria = new Category();
+        this.urgent = false;
         this.readState = new NoLeidoState();
     }
     
@@ -36,6 +44,14 @@ public abstract class Mensaje {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public Mensaje getReplyTo() {
+        return replyTo;
+    }
+
+    public void setReplyTo(Mensaje replyTo) {
+        this.replyTo = replyTo;
     }
     
     public boolean canDelete(){

@@ -11,6 +11,7 @@ import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -34,36 +35,53 @@ public class InboxWindow extends javax.swing.JFrame {
         initComponents();
         
         tblMessages.removeColumn(tblMessages.getColumnModel().getColumn(3));
-        tblMessages.removeColumn(tblMessages.getColumnModel().getColumn(3));
         
         tblMessages.getColumnModel().getColumn(0).setCellRenderer(new ReadRenderer());
         
-        tblMessages.addMouseListener(new MouseAdapter() {
-            public void mousePressed(MouseEvent me) {
-                JTable table =(JTable) me.getSource();
-                Point p = me.getPoint();
-                int row = table.rowAtPoint(p);
-                if (me.getClickCount() == 2) {
-                    // your valueChanged overridden method 
-                    JOptionPane.showMessageDialog(null, tblMessages.getModel().getValueAt(row, 4)); 
-                }
-            }
-        });
+        tblMessages.addMouseListener(new TableDoubleClickListener());
         
+    }
+    
+    public class TableDoubleClickListener extends MouseAdapter{
+        public void mousePressed(MouseEvent me) {
+            JTable table =(JTable) me.getSource();
+            Point p = me.getPoint();
+            int row = table.rowAtPoint(p);
+            if (me.getClickCount() == 2) {
+                // your valueChanged overridden method 
+                //JOptionPane.showMessageDialog(null, tblMessages.getModel().getValueAt(row, 3)); 
+                messageDblClicked((int) tblMessages.getModel().getValueAt(row, 3));
+            }
+        }
+    }
+    
+    public void messageDblClicked(int id){
+        Mensaje msg = Sistema.getInstance().getCurrentUser().getMensaje(id);
+        ViewMailWindow vmw = new ViewMailWindow(msg);
+        vmw.setVisible(true);
+        
+        //letting the state know that the message has been opened
+        //the state will be in charge of setting the object in the new read state
+        msg.getReadState().openMessage(msg);
     }
     
     public class ReadRenderer extends DefaultTableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column); 
-            Boolean read = (Boolean) table.getModel().getValueAt(row, 3);
+            Component comp = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column); 
+            int messageid = (int) table.getModel().getValueAt(row, 3);
+            Mensaje msg = Sistema.getInstance().getCurrentUser().getMensaje(messageid);
+            Boolean read = msg.getReadState().isRead();
             // You'll need some way to supply the filter value, may via a centralised 
             // manager of some kind.
             if (read == false) {
-                setOpaque(true);
-                setBackground(Color.RED);
+                comp.setForeground(Color.BLACK);
+                comp.setBackground(Color.YELLOW);
+            }else{
+                comp.setForeground(Color.BLACK);
+                comp.setBackground(Color.WHITE);
             }
-            return this;
+            return comp;
         }
     }
 
@@ -114,7 +132,7 @@ public class InboxWindow extends javax.swing.JFrame {
 
             },
             new String [] {
-                "De", "Asunto", "Fecha/Hora", "ReadState", "id"
+                "De", "Asunto", "Fecha/Hora", "id"
             }
         ));
         tblMessages.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
@@ -217,7 +235,7 @@ public class InboxWindow extends javax.swing.JFrame {
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
         // TODO add your handling code here:
-        int messageid = (Integer) tblMessages.getModel().getValueAt(tblMessages.getSelectedRow(), 4);
+        int messageid = (Integer) tblMessages.getModel().getValueAt(tblMessages.getSelectedRow(), 3);
         Mensaje msg = Sistema.getInstance().getCurrentUser().getMensaje(messageid);
         
         if (msg.canDelete()){
@@ -262,10 +280,10 @@ public class InboxWindow extends javax.swing.JFrame {
         for (Mensaje m : messages){
             String remitente = m.getRemitente().getNick();
             String subject = m.getAsunto();
-            Boolean read = m.getReadState().isRead();
+            Date d = m.getDatetime();
             Integer id = m.getId();
             
-            model.addRow(new Object[]{ remitente, subject, null, read, id });
+            model.addRow(new Object[]{ remitente, subject, d.toString(), id });
         }
     }
     
