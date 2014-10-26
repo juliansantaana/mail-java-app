@@ -11,5 +11,6 @@ package mail;
  */
 public interface UsuarioComponente {
     
+    public void addMessage(Mensaje message);
     
 }

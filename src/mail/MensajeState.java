@@ -12,5 +12,7 @@ package mail;
 public interface MensajeState {
     
     boolean canDelete();
+    boolean isRead();
+    void openMessage(Mensaje ctx);
     
 }

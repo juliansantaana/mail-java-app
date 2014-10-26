@@ -20,10 +20,13 @@ public class Sistema {
     private ArrayList<Usuario> Users = new ArrayList<>();
     private ArrayList<Category> Categories = new ArrayList<>();
     private ArrayList<UserGroup> Sections = new ArrayList<>();
+    private int messageIdCounter;
    
     private Usuario currentUser;
     
-    private Sistema(){ }
+    private Sistema(){
+        this.messageIdCounter = 0;
+    }
     
     public static Sistema getInstance(){
         return instance;
@@ -39,6 +42,10 @@ public class Sistema {
             }
         }
         return null;
+    }
+    
+    public Integer getNextMessageId(){
+        return ++this.messageIdCounter;
     }
     
     public void setCurrentUser(Usuario user){

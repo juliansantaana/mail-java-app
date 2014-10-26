@@ -5,6 +5,22 @@
  */
 package mail.Views;
 
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Point;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import mail.Mensaje;
+import mail.Sistema;
+import mail.Usuario;
+
 /**
  *
  * @author juliansantaana
@@ -16,6 +32,39 @@ public class InboxWindow extends javax.swing.JFrame {
      */
     public InboxWindow() {
         initComponents();
+        
+        tblMessages.removeColumn(tblMessages.getColumnModel().getColumn(3));
+        tblMessages.removeColumn(tblMessages.getColumnModel().getColumn(3));
+        
+        tblMessages.getColumnModel().getColumn(0).setCellRenderer(new ReadRenderer());
+        
+        tblMessages.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent me) {
+                JTable table =(JTable) me.getSource();
+                Point p = me.getPoint();
+                int row = table.rowAtPoint(p);
+                if (me.getClickCount() == 2) {
+                    // your valueChanged overridden method 
+                    JOptionPane.showMessageDialog(null, tblMessages.getModel().getValueAt(row, 4)); 
+                }
+            }
+        });
+        
+    }
+    
+    public class ReadRenderer extends DefaultTableCellRenderer {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column); 
+            Boolean read = (Boolean) table.getModel().getValueAt(row, 3);
+            // You'll need some way to supply the filter value, may via a centralised 
+            // manager of some kind.
+            if (read == false) {
+                setOpaque(true);
+                setBackground(Color.RED);
+            }
+            return this;
+        }
     }
 
     /**
@@ -27,41 +76,69 @@ public class InboxWindow extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jTextField1 = new javax.swing.JTextField();
-        jButton1 = new javax.swing.JButton();
-        jComboBox1 = new javax.swing.JComboBox();
+        txtSearchQuery = new javax.swing.JTextField();
+        btnSearch = new javax.swing.JButton();
+        cmbSearchMode = new javax.swing.JComboBox();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tblMessages = new javax.swing.JTable(){
+            private static final long serialVersionUID = 1L;
+            public boolean isCellEditable(int row, int column){
+                return false;
+            };
+        };
         btnComposeMail = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
+        btnRefresh = new javax.swing.JButton();
+        jSeparator2 = new javax.swing.JSeparator();
+        btnDelete = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jTextField1.addActionListener(new java.awt.event.ActionListener() {
+        txtSearchQuery.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField1ActionPerformed(evt);
+                txtSearchQueryActionPerformed(evt);
             }
         });
 
-        jButton1.setText("Buscar");
+        btnSearch.setText("Buscar");
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Cuerpo", "Asunto", "Destinatario", "Fecha" }));
+        cmbSearchMode.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Cuerpo", "Asunto", "Destinatario", "Fecha" }));
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tblMessages.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
             new String [] {
-                "De", "Asunto", "Fecha/Hora"
+                "De", "Asunto", "Fecha/Hora", "ReadState", "id"
             }
         ));
-        jTable1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        jScrollPane1.setViewportView(jTable1);
+        tblMessages.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        tblMessages.getTableHeader().setReorderingAllowed(false);
+        jScrollPane1.setViewportView(tblMessages);
 
         btnComposeMail.setText("Nuevo Mensaje");
         btnComposeMail.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnComposeMailActionPerformed(evt);
+            }
+        });
+
+        btnRefresh.setText("Actualizar");
+        btnRefresh.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRefreshActionPerformed(evt);
+            }
+        });
+
+        btnDelete.setText("Eliminar");
+        btnDelete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteActionPerformed(evt);
             }
         });
 
@@ -71,18 +148,26 @@ public class InboxWindow extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(btnComposeMail, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jSeparator1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jSeparator2)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(btnRefresh, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnComposeMail, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jSeparator1, javax.swing.GroupLayout.DEFAULT_SIZE, 1, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(btnDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                     .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 296, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtSearchQuery, javax.swing.GroupLayout.PREFERRED_SIZE, 296, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(cmbSearchMode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton1)))
+                        .addComponent(btnSearch)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -90,23 +175,30 @@ public class InboxWindow extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGap(12, 12, 12)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtSearchQuery, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnSearch)
+                    .addComponent(cmbSearchMode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnComposeMail))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 259, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnRefresh))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnDelete)))
                 .addContainerGap(22, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
+    private void txtSearchQueryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSearchQueryActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField1ActionPerformed
+    }//GEN-LAST:event_txtSearchQueryActionPerformed
 
     private void btnComposeMailActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnComposeMailActionPerformed
         // TODO add your handling code here:
@@ -114,6 +206,69 @@ public class InboxWindow extends javax.swing.JFrame {
         composeWindow.setVisible(true);
     }//GEN-LAST:event_btnComposeMailActionPerformed
 
+    private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
+        // TODO add your handling code here:
+        Usuario user = Sistema.getInstance().getCurrentUser();
+        ArrayList<Mensaje> messages = user.getMensajes();
+        fillMessageList(messages);
+        
+        //tblMessages.setModel(model);
+    }//GEN-LAST:event_btnRefreshActionPerformed
+
+    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
+        // TODO add your handling code here:
+        int messageid = (Integer) tblMessages.getModel().getValueAt(tblMessages.getSelectedRow(), 4);
+        Mensaje msg = Sistema.getInstance().getCurrentUser().getMensaje(messageid);
+        
+        if (msg.canDelete()){
+            try {
+                Sistema.getInstance().getCurrentUser().deleteMessage(msg);
+            } catch (Exception ex) {
+                Logger.getLogger(InboxWindow.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }else{
+            JOptionPane.showMessageDialog(null, "El mensaje no puede ser eliminado sin ser leido antes.");
+            //TODO call show message with a callback to delete message after closing the window.
+        }
+    }//GEN-LAST:event_btnDeleteActionPerformed
+
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
+        // TODO add your handling code here:
+        Usuario.FIND_MODE mode = Usuario.FIND_MODE.BODY;
+        switch(cmbSearchMode.getSelectedItem().toString().toUpperCase()){
+            case "CUERPO":
+                mode = Usuario.FIND_MODE.BODY;
+                break;
+            case "ASUNTO":
+                mode = Usuario.FIND_MODE.SUBJECT;
+                break;
+            case "DESTINATARIO":
+                mode = Usuario.FIND_MODE.TO;
+                break;
+            case "FECHA":
+                mode = Usuario.FIND_MODE.DATE;
+                break;
+        }
+        
+        ArrayList<Mensaje> messages = Sistema.getInstance().getCurrentUser().findMessages(mode, txtSearchQuery.getText());
+        fillMessageList(messages);
+        
+    }//GEN-LAST:event_btnSearchActionPerformed
+
+    private void fillMessageList(ArrayList<Mensaje> messages){
+        DefaultTableModel model = ((DefaultTableModel)tblMessages.getModel());
+        
+        model.setRowCount(0);
+        for (Mensaje m : messages){
+            String remitente = m.getRemitente().getNick();
+            String subject = m.getAsunto();
+            Boolean read = m.getReadState().isRead();
+            Integer id = m.getId();
+            
+            model.addRow(new Object[]{ remitente, subject, null, read, id });
+        }
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -151,11 +306,14 @@ public class InboxWindow extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnComposeMail;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JComboBox jComboBox1;
+    private javax.swing.JButton btnDelete;
+    private javax.swing.JButton btnRefresh;
+    private javax.swing.JButton btnSearch;
+    private javax.swing.JComboBox cmbSearchMode;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JTextField jTextField1;
+    private javax.swing.JSeparator jSeparator2;
+    private javax.swing.JTable tblMessages;
+    private javax.swing.JTextField txtSearchQuery;
     // End of variables declaration//GEN-END:variables
 }

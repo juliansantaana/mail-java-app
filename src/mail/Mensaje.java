@@ -6,6 +6,7 @@
 package mail;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  *
@@ -13,11 +14,13 @@ import java.util.ArrayList;
  */
 public abstract class Mensaje {
     
+    private Integer id;
     private Usuario remitente;
     private ArrayList<UsuarioComponente> destinatarios;
     private String asunto;
     private String cuerpo;
     private Category categoria;
+    private Date datetime = new Date();
     private boolean urgent;
     private MensajeState readState;
     
@@ -26,9 +29,25 @@ public abstract class Mensaje {
     }
     
     public abstract String getContenido();
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
     
     public boolean canDelete(){
         return this.readState.canDelete();
+    }
+
+    public Date getDatetime() {
+        return datetime;
+    }
+
+    public void setDatetime(Date datetime) {
+        this.datetime = datetime;
     }
     
     public MensajeState getReadState() {

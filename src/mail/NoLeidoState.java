@@ -16,5 +16,15 @@ public class NoLeidoState implements MensajeState{
         //no message can be deleted unless its been read first.
         return false;
     }
+
+    @Override
+    public boolean isRead() {
+        return false;
+    }
+
+    @Override
+    public void openMessage(Mensaje ctx) {
+        ctx.setReadState(new LeidoState());
+    }
     
 }

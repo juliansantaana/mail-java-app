@@ -8,6 +8,7 @@ package mail.Views;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Date;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import mail.Category;
@@ -37,6 +38,9 @@ public class ComposeMailWindow extends javax.swing.JFrame {
     
     public ComposeMailWindow() {
         initComponents();
+        
+        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        
         initAutocomplete();
         
         message = new MensajeComun();
@@ -345,7 +349,11 @@ public class ComposeMailWindow extends javax.swing.JFrame {
         this.message.setAsunto(txtAsunto.getText());
         this.message.setRemitente(Sistema.getInstance().getCurrentUser());
         this.message.setDestinatarios(Sistema.getInstance().getUsersFromMailString(txtToField.getText()));
+        this.message.setDatetime(new Date());
         
+        this.message.setId(Sistema.getInstance().getNextMessageId());
+        Sistema.getInstance().getCurrentUser().sendEmail(message);
+        this.dispose();
     }//GEN-LAST:event_btnSendActionPerformed
 
     /**

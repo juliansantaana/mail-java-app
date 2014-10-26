@@ -6,7 +6,11 @@
 package mail;
 
 import java.awt.List;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  *
@@ -21,13 +25,17 @@ public class Usuario implements UsuarioComponente{
     private String celular;
     private String mail;
     private ArrayList<Usuario> subordinados;
+    private ArrayList<Mensaje> mensajes;
     
     public Usuario(){
         this.subordinados = new ArrayList<>();
+        this.mensajes = new ArrayList<>();
     }
     
     public Usuario(String nick, String password){
         this.subordinados = new ArrayList<>();
+        this.mensajes = new ArrayList<>();
+        
         this.nick = nick;
         //setting default password
         this.password = password;
@@ -91,6 +99,99 @@ public class Usuario implements UsuarioComponente{
 
     public void setSubordinados(ArrayList<Usuario> subordinados) {
         this.subordinados = subordinados;
+    }
+    
+    @Override
+    public void addMessage(Mensaje message){
+        this.mensajes.add(message);
+    }
+    
+    public void deleteMessage(Mensaje message) throws Exception{
+        if (message.canDelete()){
+            this.mensajes.remove(message);
+        }else{
+            throw new Exception("Message can't be deleted.");
+        }
+    }
+    
+    public void sendEmail(Mensaje message){
+        //this.addMessage(message);
+        for (UsuarioComponente user : message.getDestinatarios()){
+            user.addMessage(message);
+        }
+    }
+
+    public ArrayList<Mensaje> getMensajes() {
+        return this.mensajes;
+    }
+    
+    public Mensaje getMensaje(int id){
+        Mensaje msg = null;
+        
+        for (Mensaje m : this.mensajes){
+            if (m.getId() == id){
+                msg = m;
+                break;
+            }
+        }
+        
+        return msg;
+    }
+    
+    public enum FIND_MODE{
+        BODY, 
+        SUBJECT, 
+        TO, 
+        DATE
+    }
+    
+    public ArrayList<Mensaje> findMessages(FIND_MODE mode, String query){
+        ArrayList<Mensaje> messages = new ArrayList<>();
+        query = query.toUpperCase();
+        
+        ArrayList<UsuarioComponente> users = new ArrayList<>();
+        if (mode == FIND_MODE.TO){
+            users = Sistema.getInstance().getUsersFromMailString(query);
+        }
+        
+        for (Mensaje m : this.mensajes){
+            
+            if (mode == FIND_MODE.BODY){
+                if (m.getCuerpo().toUpperCase().contains(query)){
+                    messages.add(m);
+                }
+            }else if (mode == FIND_MODE.SUBJECT){
+                if (m.getAsunto().toUpperCase().contains(query)){
+                    messages.add(m);
+                }
+            }else if (mode == FIND_MODE.TO){
+                if (users.size() > 0){
+                    UsuarioComponente user = users.get(0);
+                    if (m.getDestinatarios().contains(user)){
+                        messages.add(m);
+                    }
+                }
+            }else if (mode == FIND_MODE.DATE){
+                SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+                try {
+                    Date date = formatter.parse(query);
+                    
+                    Calendar cal1 = Calendar.getInstance();
+                    Calendar cal2 = Calendar.getInstance();
+                    cal1.setTime(date);
+                    cal2.setTime(m.getDatetime());
+                    boolean sameDay = cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                                      cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
+                    
+                    if (sameDay) messages.add(m);
+                    
+                } catch (ParseException e) {
+                        e.printStackTrace();
+                }
+            }
+        }
+        
+        return messages;
     }
     
 }

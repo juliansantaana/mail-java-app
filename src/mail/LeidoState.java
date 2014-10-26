@@ -16,5 +16,15 @@ public class LeidoState implements MensajeState{
         //if a message was already read, then it can be deleted
         return true;
     }
+
+    @Override
+    public boolean isRead() {
+        return true;
+    }
+
+    @Override
+    public void openMessage(Mensaje ctx) {
+        ctx.setReadState(new LeidoState());
+    }
     
 }

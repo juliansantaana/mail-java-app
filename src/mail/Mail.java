@@ -6,6 +6,7 @@
 package mail;
 
 import java.util.ArrayList;
+import mail.Views.InboxWindow;
 import mail.Views.MainWindow;
 
 /**
@@ -19,6 +20,7 @@ public class Mail {
      */
     public static void main(String[] args) {
         // TODO code application logic here
+        Boolean debug = true;
         
         Usuario juan, pedro, pepe, julian, zhou, nicolas, mafalda, camila, carolina;
         juan = new Usuario("Juan");
@@ -66,8 +68,17 @@ public class Mail {
         Sistema.getInstance().getCategories().add(new Category(2, "Cobros", "Cobros1"));
         Sistema.getInstance().getCategories().add(new Category(3, "Ventas", "Ventas1"));
         
-        MainWindow mw = new MainWindow();
-        mw.setVisible(true);
+        if (debug == false){
+            MainWindow mw = new MainWindow();
+            mw.setVisible(true);
+        }else{
+            Usuario user = Sistema.getInstance().Login("pepe", "password");
+            if (user != null){
+                Sistema.getInstance().setCurrentUser(user);
+                InboxWindow iw = new InboxWindow();
+                iw.setVisible(true);
+            }
+        }
         
     }
     

@@ -54,5 +54,12 @@ public class UserGroup implements UsuarioComponente {
     public void setUsers(ArrayList<UsuarioComponente> users) {
         this.users = users;
     }
+
+    @Override
+    public void addMessage(Mensaje message) {
+        for(UsuarioComponente user : this.getUsers()){
+            user.addMessage(message);
+        }
+    }
     
 }
