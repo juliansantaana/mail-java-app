@@ -33,13 +33,13 @@ public class Usuario implements UsuarioComponente{
     private ArrayList<Mensaje> mensajes;
     
     public Usuario(){
-        this.subordinados = new ArrayList<>();
-        this.mensajes = new ArrayList<>();
+        this.subordinados = new ArrayList<Usuario>();
+        this.mensajes = new ArrayList<Mensaje>();
     }
     
     public Usuario(String nick, String password){
-        this.subordinados = new ArrayList<>();
-        this.mensajes = new ArrayList<>();
+        this.subordinados = new ArrayList<Usuario>();
+        this.mensajes = new ArrayList<Mensaje>();
         
         this.nick = nick;
         //setting default password
@@ -168,10 +168,10 @@ public class Usuario implements UsuarioComponente{
     }
     
     public ArrayList<Mensaje> findMessages(FIND_MODE mode, String query){
-        ArrayList<Mensaje> messages = new ArrayList<>();
+        ArrayList<Mensaje> messages = new ArrayList<Mensaje>();
         query = query.toUpperCase();
         
-        ArrayList<UsuarioComponente> users = new ArrayList<>();
+        ArrayList<UsuarioComponente> users = new ArrayList<UsuarioComponente>();
         if (mode == FIND_MODE.TO){
             users = Sistema.getInstance().getUsersFromMailString(query);
         }

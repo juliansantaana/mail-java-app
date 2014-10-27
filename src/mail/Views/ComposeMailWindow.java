@@ -144,7 +144,7 @@ public class ComposeMailWindow extends javax.swing.JFrame {
     private void initAutocomplete() {
         txtToField.setFocusTraversalKeysEnabled(false);
 
-        ArrayList<String> keywords = new ArrayList<>();
+        ArrayList<String> keywords = new ArrayList<String>();
 
         for (String s : Sistema.getInstance().getUsersNicks()) {
             keywords.add(s.toLowerCase());

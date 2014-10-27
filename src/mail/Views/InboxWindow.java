@@ -365,14 +365,14 @@ public class InboxWindow extends javax.swing.JFrame {
     
     public void refreshMessageList(){
         Usuario user = Sistema.getInstance().getCurrentUser();
-        ArrayList<Mensaje> messages = new ArrayList<>();
+        ArrayList<Mensaje> messages = new ArrayList<Mensaje>();
         
         for (Mensaje m : user.getMensajes()){
             messages.add(m);
         }
         
         if (this.messagesOrderBy == MESSAGES_ORDER_BY.CONVERSATION){
-            ArrayList<Mensaje> messagesOrdered = new ArrayList<>();
+            ArrayList<Mensaje> messagesOrdered = new ArrayList<Mensaje>();
             while (messages.size() > 0){
                 Mensaje msg = messages.get(0);
                 messagesOrdered.add(msg);
@@ -443,7 +443,7 @@ public class InboxWindow extends javax.swing.JFrame {
         MensajeComun notification = new MensajeComun();
         notification.setRemitente(Sistema.getInstance().getCurrentUser());
         
-        ArrayList<UsuarioComponente> destinatarios = new ArrayList<>();
+        ArrayList<UsuarioComponente> destinatarios = new ArrayList<UsuarioComponente>();
         destinatarios.add(msg.getRemitente());
         notification.setDestinatarios(destinatarios);
         

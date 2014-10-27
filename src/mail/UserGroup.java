@@ -19,7 +19,7 @@ public class UserGroup implements UsuarioComponente {
     private ArrayList<UsuarioComponente> users;
     
     public UserGroup(String name){
-        this.users = new ArrayList<>();
+        this.users = new ArrayList<UsuarioComponente>();
         this.name = name;
     }
 

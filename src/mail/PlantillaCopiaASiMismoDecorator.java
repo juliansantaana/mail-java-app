@@ -24,7 +24,7 @@ public class PlantillaCopiaASiMismoDecorator extends MensajeDecorator {
 
     @Override
     public ArrayList<UsuarioComponente> getDestinatarios() {
-        ArrayList<UsuarioComponente> destinatarios = new ArrayList<>();
+        ArrayList<UsuarioComponente> destinatarios = new ArrayList<UsuarioComponente>();
         for (UsuarioComponente uc : super.getDestinatarios()){
             destinatarios.add(uc);
         }

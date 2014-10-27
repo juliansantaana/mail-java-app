@@ -55,7 +55,7 @@ public class Mail {
         zhou.getSubordinados().add(pepe);
         
         UserGroup sector1 = new UserGroup("plantabaja");
-        ArrayList<UsuarioComponente> sector1usuarios = new ArrayList<>();
+        ArrayList<UsuarioComponente> sector1usuarios = new ArrayList<UsuarioComponente>();
         sector1usuarios.add(juan);
         sector1usuarios.add(julian);
         sector1usuarios.add(mafalda);
@@ -64,7 +64,7 @@ public class Mail {
         Sistema.getInstance().getSections().add(sector1);
         
         UserGroup sector2 = new UserGroup("plantaalta");
-        ArrayList<UsuarioComponente> sector2usuarios = new ArrayList<>();
+        ArrayList<UsuarioComponente> sector2usuarios = new ArrayList<UsuarioComponente>();
         sector2usuarios.add(pedro);
         sector2usuarios.add(camila);
         sector2usuarios.add(carolina);

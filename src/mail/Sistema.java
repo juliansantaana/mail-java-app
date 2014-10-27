@@ -22,10 +22,10 @@ public class Sistema {
     
     private Timer checkRemindersTimer;
     
-    private ArrayList<Usuario> Users = new ArrayList<>();
-    private ArrayList<Category> Categories = new ArrayList<>();
-    private ArrayList<UserGroup> Sections = new ArrayList<>();
-    private ArrayList<Recordatorio> Reminders =  new ArrayList<>();
+    private ArrayList<Usuario> Users = new ArrayList<Usuario>();
+    private ArrayList<Category> Categories = new ArrayList<Category>();
+    private ArrayList<UserGroup> Sections = new ArrayList<UserGroup>();
+    private ArrayList<Recordatorio> Reminders =  new ArrayList<Recordatorio>();
     
     private int messageIdCounter;
    
@@ -91,7 +91,7 @@ public class Sistema {
     }
     
     public ArrayList<String> getUsersNicks(){
-        ArrayList<String> allNicks = new ArrayList<>();
+        ArrayList<String> allNicks = new ArrayList<String>();
         for (Usuario user : this.Users){
             allNicks.add(user.getNick());
         }
@@ -100,7 +100,7 @@ public class Sistema {
     }
     
     public ArrayList<String> getSectionNames(){
-        ArrayList<String> allSections = new ArrayList<>();
+        ArrayList<String> allSections = new ArrayList<String>();
         for (UserGroup ug : this.Sections){
             allSections.add(ug.getName());
         }
@@ -186,7 +186,7 @@ public class Sistema {
     }
     
     private ArrayList<Recordatorio> getRemindersForTime(Date d){
-        ArrayList<Recordatorio> reminders = new ArrayList<>();
+        ArrayList<Recordatorio> reminders = new ArrayList<Recordatorio>();
         for (Recordatorio r : this.Reminders){
             if (r.getAutosendDatetime().equals(d) || r.getAutosendDatetime().before(d)){
                 reminders.add(r);
