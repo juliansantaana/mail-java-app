@@ -13,6 +13,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -34,6 +35,14 @@ public class InboxWindow extends javax.swing.JFrame {
     /**
      * Creates new form InboxWindow
      */
+    
+    private enum MESSAGES_ORDER_BY{
+        DATE, 
+        CONVERSATION, 
+    }
+    
+    private MESSAGES_ORDER_BY messagesOrderBy = MESSAGES_ORDER_BY.DATE;
+    
     public InboxWindow() {
         initComponents();
         
@@ -131,6 +140,9 @@ public class InboxWindow extends javax.swing.JFrame {
         jSeparator2 = new javax.swing.JSeparator();
         btnDelete = new javax.swing.JButton();
         btnLogout = new javax.swing.JButton();
+        btnComposeMail1 = new javax.swing.JButton();
+        cmbOrderBy = new javax.swing.JComboBox();
+        lblOrderBy = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -189,26 +201,50 @@ public class InboxWindow extends javax.swing.JFrame {
             }
         });
 
+        btnComposeMail1.setText("Nuevo Recordatorio");
+        btnComposeMail1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnComposeMail1ActionPerformed(evt);
+            }
+        });
+
+        cmbOrderBy.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Fecha", "Conversacion" }));
+        cmbOrderBy.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbOrderByActionPerformed(evt);
+            }
+        });
+
+        lblOrderBy.setText("Ordernar por:");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSeparator2)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(btnRefresh, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnComposeMail, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jSeparator1, javax.swing.GroupLayout.DEFAULT_SIZE, 1, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(btnDelete, javax.swing.GroupLayout.DEFAULT_SIZE, 138, Short.MAX_VALUE)
-                            .addComponent(btnLogout, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addContainerGap()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jSeparator2)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(btnRefresh, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(btnComposeMail, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(btnComposeMail1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jSeparator1, javax.swing.GroupLayout.DEFAULT_SIZE, 1, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(btnLogout, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(btnDelete, javax.swing.GroupLayout.DEFAULT_SIZE, 167, Short.MAX_VALUE)
+                                    .addComponent(cmbOrderBy, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGap(0, 0, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(15, 15, 15)
+                        .addComponent(lblOrderBy)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                     .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
@@ -235,12 +271,21 @@ public class InboxWindow extends javax.swing.JFrame {
                         .addContainerGap(28, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(btnRefresh))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(19, 19, 19))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(btnComposeMail1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
+                        .addComponent(btnRefresh)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnDelete)
+                        .addGap(33, 33, 33)
+                        .addComponent(lblOrderBy)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cmbOrderBy, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(btnLogout))))
         );
@@ -266,19 +311,7 @@ public class InboxWindow extends javax.swing.JFrame {
         // TODO add your handling code here:
         int messageid = (Integer) tblMessages.getModel().getValueAt(tblMessages.getSelectedRow(), 3);
         Mensaje msg = Sistema.getInstance().getCurrentUser().getMensaje(messageid);
-        
-        if (msg.canDelete()){
-            try {
-                Sistema.getInstance().getCurrentUser().deleteMessage(msg);
-            } catch (Exception ex) {
-                Logger.getLogger(InboxWindow.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            
-            refreshMessageList();
-        }else{
-            JOptionPane.showMessageDialog(null, "El mensaje no puede ser eliminado sin ser leido antes.");
-            //TODO call show message with a callback to delete message after closing the window.
-        }
+        deleteMessage(msg);
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
@@ -313,10 +346,61 @@ public class InboxWindow extends javax.swing.JFrame {
         
         this.dispose();
     }//GEN-LAST:event_btnLogoutActionPerformed
+
+    private void btnComposeMail1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnComposeMail1ActionPerformed
+        ComposeMailWindow cmw = new ComposeMailWindow(ComposeMailWindow.COMPOSE_MODE.REMINDER);
+        cmw.setVisible(true);
+    }//GEN-LAST:event_btnComposeMail1ActionPerformed
+
+    private void cmbOrderByActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbOrderByActionPerformed
+        switch(cmbOrderBy.getSelectedItem().toString().toUpperCase()){
+            case "FECHA":
+                this.messagesOrderBy = MESSAGES_ORDER_BY.DATE;
+                break;
+            case "CONVERSACION":
+                this.messagesOrderBy = MESSAGES_ORDER_BY.CONVERSATION;
+                break;
+        }
+    }//GEN-LAST:event_cmbOrderByActionPerformed
     
     public void refreshMessageList(){
         Usuario user = Sistema.getInstance().getCurrentUser();
-        ArrayList<Mensaje> messages = user.getMensajes();
+        ArrayList<Mensaje> messages = new ArrayList<>();
+        
+        for (Mensaje m : user.getMensajes()){
+            messages.add(m);
+        }
+        
+        if (this.messagesOrderBy == MESSAGES_ORDER_BY.CONVERSATION){
+            ArrayList<Mensaje> messagesOrdered = new ArrayList<>();
+            while (messages.size() > 0){
+                Mensaje msg = messages.get(0);
+                messagesOrdered.add(msg);
+                messages.remove(msg);
+                while (msg.getReplyTo() != null){
+                    Mensaje replyTo = msg.getReplyTo();
+                    Boolean found = false;
+                    
+                    for (Mensaje m : messages){
+                        if (Objects.equals(m.getId(), replyTo.getId())){
+                            msg = m;
+                            found = true;
+                            break;
+                        }
+                    }
+                    
+                    if (found == true){
+                        messagesOrdered.add(msg);
+                        messages.remove(msg);
+                    }else{
+                        msg = replyTo;
+                    }
+                }
+            }
+            
+            messages.addAll(messagesOrdered);
+        }
+        
         fillMessageList(messages);
         
         //checking if there's any urgent message
@@ -329,6 +413,29 @@ public class InboxWindow extends javax.swing.JFrame {
                     }
                 });
             }
+        }
+    }
+    
+    private void deleteMessage(Mensaje msg){
+        if (msg.canDelete()){
+            try {
+                Sistema.getInstance().getCurrentUser().deleteMessage(msg);
+            } catch (Exception ex) {
+                Logger.getLogger(InboxWindow.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            refreshMessageList();
+        }else{
+            JOptionPane.showMessageDialog(null, "El mensaje no puede ser eliminado sin ser leido antes. "
+                    + "Se abrira automaticamente el mensaje para su lectura y sera eliminado automáticamente "
+                    + "luego de ser cerrada la ventana.");
+            
+            openMessage(msg, new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                    deleteMessage(msg);
+                }
+            });
         }
     }
     
@@ -398,14 +505,17 @@ public class InboxWindow extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnComposeMail;
+    private javax.swing.JButton btnComposeMail1;
     private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnLogout;
     private javax.swing.JButton btnRefresh;
     private javax.swing.JButton btnSearch;
+    private javax.swing.JComboBox cmbOrderBy;
     private javax.swing.JComboBox cmbSearchMode;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
+    private javax.swing.JLabel lblOrderBy;
     private javax.swing.JTable tblMessages;
     private javax.swing.JTextField txtSearchQuery;
     // End of variables declaration//GEN-END:variables

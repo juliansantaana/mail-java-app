@@ -12,6 +12,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -113,10 +114,16 @@ public class Usuario implements UsuarioComponente{
     
     public void deleteMessage(Mensaje message) throws Exception{
         if (message.canDelete()){
-            this.mensajes.remove(message);
+            if (this.mensajes.contains(message)){
+                this.mensajes.remove(message);
+            }
         }else{
             throw new Exception("Message can't be deleted.");
         }
+    }
+    
+    public void scheduleReminder(Mensaje message){
+        Sistema.getInstance().addReminder((Recordatorio) message);
     }
     
     public void sendEmail(Mensaje message){
@@ -130,6 +137,13 @@ public class Usuario implements UsuarioComponente{
     }
 
     public ArrayList<Mensaje> getMensajes() {
+        this.mensajes.sort(new Comparator<Mensaje>(){
+            @Override
+            public int compare(Mensaje o1, Mensaje o2) {
+                return - (o1.getDatetime().compareTo(o2.getDatetime()));
+            }
+        });
+        
         return this.mensajes;
     }
     

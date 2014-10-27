@@ -8,16 +8,23 @@ package mail.Views;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import javax.swing.JSpinner;
 import javax.swing.KeyStroke;
+import javax.swing.SpinnerDateModel;
 import mail.Category;
 import mail.FirmaDecorator;
 import mail.Mensaje;
 import mail.MensajeComun;
 import mail.MensajeDecorator;
-import mail.PlantillaDecorator;
+import mail.PlantillaCopiaASiMismoDecorator;
+import mail.Recordatorio;
 import mail.Sistema;
 import vendor.Autocomplete;
 
@@ -31,19 +38,40 @@ public class ComposeMailWindow extends javax.swing.JFrame {
      * Creates new form ComposeMail
      */
     private static final String COMMIT_ACTION = "commit";
+    private COMPOSE_MODE mode;
     private Mensaje message;
 
+    public enum COMPOSE_MODE{
+        REMINDER, 
+        MESSAGE,
+    }
+    
     //sub views
     private AddCategoryHelperWindow categoryHelperWindow;
-
-    public ComposeMailWindow() {
+    private AddTemplateHelperWindow templateHelperWindow;
+    
+    public ComposeMailWindow(Mensaje msg, COMPOSE_MODE mode) {
         initComponents();
 
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         initAutocomplete();
 
-        message = new MensajeComun();
+        lblReminder.setVisible(false);
+        spinnerTime.setVisible(false);
+        
+        this.mode = mode;
+        
+        if (this.mode == COMPOSE_MODE.MESSAGE){
+            this.message = new MensajeComun();
+        }else if (this.mode == COMPOSE_MODE.REMINDER){
+            lblReminder.setVisible(true);
+            spinnerTime.setVisible(true);
+            
+            this.message = new Recordatorio();
+        }
+        
+        if (msg != null) this.message = msg;
 
         categoryHelperWindow = new AddCategoryHelperWindow();
         categoryHelperWindow.addActionListenerAceptar(new ActionListener() {
@@ -55,17 +83,54 @@ public class ComposeMailWindow extends javax.swing.JFrame {
                 categoryHelperWindow.setVisible(false);
 
                 updateCategoriaLabel();
-                System.out.println("Setting category to message: " + message.getCategoria().getName() + "\n");
             }
         });
+        
+        templateHelperWindow = new AddTemplateHelperWindow();
+        templateHelperWindow.addActionListenerAceptar(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                // Your action handling code in here
+                Class c = templateHelperWindow.getSelectedTemplate();
+                
+                try {
+                    Constructor cons = c.getConstructor(new Class[]{ Mensaje.class });
+                    message = (Mensaje) cons.newInstance(message);
+                } catch (NoSuchMethodException ex) {
+                    Logger.getLogger(ComposeMailWindow.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (SecurityException ex) {
+                    Logger.getLogger(ComposeMailWindow.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (InstantiationException ex) {
+                    Logger.getLogger(ComposeMailWindow.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IllegalAccessException ex) {
+                    Logger.getLogger(ComposeMailWindow.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IllegalArgumentException ex) {
+                    Logger.getLogger(ComposeMailWindow.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (InvocationTargetException ex) {
+                    Logger.getLogger(ComposeMailWindow.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+                templateHelperWindow.setVisible(false);
+            }
+        });
+        
+        spinnerTime.setModel(new SpinnerDateModel());
+        JSpinner.DateEditor timeEditor = new JSpinner.DateEditor(spinnerTime);
+        spinnerTime.setEditor(timeEditor);
+        spinnerTime.setValue(new Date());
         
         refreshViewFromMessage();
     }
 
     public ComposeMailWindow(Mensaje message) {
-        this();
-        this.message = message;
-        refreshViewFromMessage();
+        this(message, COMPOSE_MODE.MESSAGE);
+    }
+    
+    public ComposeMailWindow(COMPOSE_MODE mode){
+        this(null, mode);
+    }
+    
+    public ComposeMailWindow(){
+        this(null, COMPOSE_MODE.MESSAGE);
     }
 
     public void refreshViewFromMessage() {
@@ -84,14 +149,20 @@ public class ComposeMailWindow extends javax.swing.JFrame {
         for (String s : Sistema.getInstance().getUsersNicks()) {
             keywords.add(s.toLowerCase());
         }
+        
+        //keyword for subordinates of
+        for (String s : Sistema.getInstance().getUsersNicks()) {
+            keywords.add("*" + s.toLowerCase());
+        }
 
         //using # to specify is a user group
         for (String s : Sistema.getInstance().getSectionNames()) {
             keywords.add("#" + s.toLowerCase());
         }
 
-        //adding keyword for subordinates
+        //adding keyword for subordinates and superiors
         keywords.add("subordinados");
+        keywords.add("superiores");
 
         Autocomplete autoComplete = new Autocomplete(txtToField, keywords);
         txtToField.getDocument().addDocumentListener(autoComplete);
@@ -132,6 +203,8 @@ public class ComposeMailWindow extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         lblCategory = new javax.swing.JLabel();
         lblPlantilla = new javax.swing.JLabel();
+        spinnerTime = new javax.swing.JSpinner();
+        lblReminder = new javax.swing.JLabel();
 
         jLabel4.setText("jLabel4");
 
@@ -196,6 +269,11 @@ public class ComposeMailWindow extends javax.swing.JFrame {
         });
 
         btnAddPlantilla.setText("Agregar Plantilla");
+        btnAddPlantilla.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddPlantillaActionPerformed(evt);
+            }
+        });
 
         txtSignature.setEditable(false);
         txtSignature.setBackground(new java.awt.Color(204, 204, 204));
@@ -207,6 +285,8 @@ public class ComposeMailWindow extends javax.swing.JFrame {
 
         jLabel2.setText("Plantilla:");
 
+        lblReminder.setText("Programado:");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -215,31 +295,6 @@ public class ComposeMailWindow extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jSeparator1)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(17, 17, 17)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(lblTo)
-                            .addComponent(lblTo1))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtToField)
-                            .addComponent(txtAsunto)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(chkboxUrgent)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnAddSignature)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnAddCategory)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnAddPlantilla)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 42, Short.MAX_VALUE)
-                        .addComponent(btnSend))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(36, 36, 36)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane1)
-                            .addComponent(jSeparator2)
-                            .addComponent(jScrollPane3)))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(lblNewMessage)
                         .addGap(234, 234, 234)
@@ -251,7 +306,38 @@ public class ComposeMailWindow extends javax.swing.JFrame {
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(lblCategory, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))
+                                .addComponent(lblCategory, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(chkboxUrgent)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnAddSignature)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnAddCategory)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnAddPlantilla)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnSend))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(36, 36, 36)
+                        .addComponent(jSeparator2))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(17, 17, 17)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane1)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(lblTo)
+                                    .addComponent(lblTo1))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtToField)
+                                    .addComponent(txtAsunto)))
+                            .addComponent(jScrollPane3)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(lblReminder)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(spinnerTime, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE)))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -284,7 +370,11 @@ public class ComposeMailWindow extends javax.swing.JFrame {
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 17, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(spinnerTime, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblReminder))
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnSend)
                     .addComponent(chkboxUrgent)
@@ -344,6 +434,18 @@ public class ComposeMailWindow extends javax.swing.JFrame {
     private void updateCategoriaLabel() {
         lblCategory.setText(this.message.getCategoria().getName());
     }
+    
+    private void setReminderTime(){
+        Date d = (Date) spinnerTime.getValue();
+        Mensaje reminder = this.message;
+        while (reminder instanceof MensajeDecorator){
+            reminder = ((MensajeDecorator) reminder).getMensaje();
+        }
+        
+        if (reminder instanceof Recordatorio){
+            ((Recordatorio)reminder).setAutosendDatetime(d);
+        }
+    }
 
     private void txtMessageFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtMessageFocusLost
         // TODO add your handling code here:
@@ -366,12 +468,21 @@ public class ComposeMailWindow extends javax.swing.JFrame {
         this.message.setRemitente(Sistema.getInstance().getCurrentUser());
         this.message.setDestinatarios(Sistema.getInstance().getUsersFromMailString(txtToField.getText()));
         
-        //this.message.setDatetime(new Date());
-        //this.message.setId(Sistema.getInstance().getNextMessageId());
+        if (mode == COMPOSE_MODE.MESSAGE){
+            Sistema.getInstance().getCurrentUser().sendEmail(message);
+        }else if (mode == COMPOSE_MODE.REMINDER){
+            setReminderTime();
+            Sistema.getInstance().getCurrentUser().scheduleReminder(message);
+        }
         
-        Sistema.getInstance().getCurrentUser().sendEmail(message);
+        
         this.dispose();
     }//GEN-LAST:event_btnSendActionPerformed
+
+    private void btnAddPlantillaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddPlantillaActionPerformed
+        // TODO add your handling code here:
+        templateHelperWindow.setVisible(true);
+    }//GEN-LAST:event_btnAddPlantillaActionPerformed
 
     /**
      * @param args the command line arguments
@@ -425,8 +536,10 @@ public class ComposeMailWindow extends javax.swing.JFrame {
     private javax.swing.JLabel lblCategory;
     private javax.swing.JLabel lblNewMessage;
     private javax.swing.JLabel lblPlantilla;
+    private javax.swing.JLabel lblReminder;
     private javax.swing.JLabel lblTo;
     private javax.swing.JLabel lblTo1;
+    private javax.swing.JSpinner spinnerTime;
     private javax.swing.JTextField txtAsunto;
     private javax.swing.JTextArea txtMessage;
     private javax.swing.JTextArea txtSignature;

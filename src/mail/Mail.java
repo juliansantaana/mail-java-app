@@ -44,6 +44,15 @@ public class Mail {
         Sistema.getInstance().getUsers().add(camila);
         Sistema.getInstance().getUsers().add(carolina);
         
+        pepe.getSubordinados().add(julian);
+        pepe.getSubordinados().add(camila);
+        pepe.getSubordinados().add(mafalda);
+        
+        juan.getSubordinados().add(pepe);
+        juan.getSubordinados().add(zhou);
+        carolina.getSubordinados().add(pepe);
+        zhou.getSubordinados().add(pepe);
+        
         UserGroup sector1 = new UserGroup("plantabaja");
         ArrayList<UsuarioComponente> sector1usuarios = new ArrayList<>();
         sector1usuarios.add(juan);

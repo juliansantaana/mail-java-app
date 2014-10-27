@@ -12,8 +12,10 @@ package mail;
 public class FirmaDecorator extends MensajeDecorator {
 
     private String firma;
-
-    public FirmaDecorator(){
+    
+    public FirmaDecorator(FirmaDecorator decorator){
+        super(decorator);
+        this.firma = decorator.firma;
     }
     
     public FirmaDecorator(Mensaje mensaje) {
@@ -21,7 +23,9 @@ public class FirmaDecorator extends MensajeDecorator {
     }
     
     public String getContenido() {
-        return this.getMensaje().getContenido() + "\n" + this.firma;
+        return this.getMensaje().getContenido() 
+                + "\n\n ----------------------------"
+                + "\n\n" + this.firma;
     }
     
     public void setFirma(String firma){

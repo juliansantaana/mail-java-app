@@ -8,6 +8,9 @@ package mail;
 import java.io.Console;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  *
@@ -17,15 +20,22 @@ public class Sistema {
     
     private static final Sistema instance = new Sistema();
     
+    private Timer checkRemindersTimer;
+    
     private ArrayList<Usuario> Users = new ArrayList<>();
     private ArrayList<Category> Categories = new ArrayList<>();
     private ArrayList<UserGroup> Sections = new ArrayList<>();
+    private ArrayList<Recordatorio> Reminders =  new ArrayList<>();
+    
     private int messageIdCounter;
    
     private Usuario currentUser;
     
     private Sistema(){
         this.messageIdCounter = 0;
+        
+        checkRemindersTimer = new Timer();
+        checkRemindersTimer.schedule(new CheckReminders(), 0, 5000);
     }
     
     public static Sistema getInstance(){
@@ -113,7 +123,17 @@ public class Sistema {
                         break;
                     }
                 }
-            }else{
+            } if (str.startsWith("*")){
+                //then is subordinates of
+                str = str.substring(1, str.length());
+                for (Usuario user : this.Users){
+                    if (user.getNick().toUpperCase().equals(str)){
+                        users.addAll(user.getSubordinados());
+                        break;
+                    }
+                }
+            }
+            else{
                 //then is a user or special keyword
                 switch (str) {
                     case "SUBORDINADOS":
@@ -121,6 +141,11 @@ public class Sistema {
                         users.addAll(subs);
                         break;
                     case "SUPERIORES":
+                        for (Usuario user : this.Users){
+                            if (user.getSubordinados().contains(this.currentUser)){
+                                users.add(user);
+                            }
+                        }
                         break;
                     default:
                         for (Usuario user : this.Users){
@@ -150,6 +175,41 @@ public class Sistema {
         }
         
         return tousers;
+    }
+    
+    public void addReminder(Recordatorio rem){
+        this.Reminders.add(rem);
+    }
+    
+    private void removeReminder(Recordatorio rem){
+        this.Reminders.remove(rem);
+    }
+    
+    private ArrayList<Recordatorio> getRemindersForTime(Date d){
+        ArrayList<Recordatorio> reminders = new ArrayList<>();
+        for (Recordatorio r : this.Reminders){
+            if (r.getAutosendDatetime().equals(d) || r.getAutosendDatetime().before(d)){
+                reminders.add(r);
+            }
+        }
+        
+        return reminders;
+    }
+    
+    private void executeReminders(Date d){
+        ArrayList<Recordatorio> reminders = getRemindersForTime(d);
+        for (Recordatorio r : reminders){
+            System.out.println("[" + new Date().toString() + "] New reminder found: sending reminder...");
+            r.getRemitente().sendEmail(r);
+            removeReminder(r);
+        }
+    }
+    
+    class CheckReminders extends TimerTask{
+        @Override
+        public void run() {
+            executeReminders(new Date());
+        }
     }
     
 }
